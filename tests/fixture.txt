@@ -1,0 +1,2 @@
+Crumbproof public demo fixture.
+This is a sample file, not a private client deliverable.
