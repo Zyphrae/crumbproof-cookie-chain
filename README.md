@@ -47,6 +47,7 @@ The verifier checks a confirmed, successful transaction, the Memo program, one i
 - A receipt records what a wallet submitted at a block; it does not establish authorship, copyright, acceptance or payment.
 - SHA-256 hashing uses Web Crypto. The browser reads the selected file into memory, bounded at 50 MiB.
 - Before broadcasting, the app stores the public signature and signing expiry locally. It does not automatically rebroadcast after an uncertain response.
+- Confirmation is checked immediately, then with up to five additional read-only checks spaced five seconds apart. A manual Check status control remains available afterward.
 - An absent transaction remains unresolved until its blockhash expires at finalized block height. The user must explicitly clear an expired marker; check the explorer before creating another proof.
 - History scans only the latest 20 wallet transactions and reports incomplete RPC reads. Older receipts can be looked up by signature.
 - RPC responses are trusted for chain state; this is not a light client or independently verified consensus proof.
