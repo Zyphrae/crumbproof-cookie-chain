@@ -25,6 +25,13 @@ export default function App(){
  async function reconcile(sig=pending?.signature){
   if(!sig)return;setBusy(true);setNotice('');try{const saved=readPending();const state=await checkStatus(sig,saved?.signature===sig?saved.lastValidBlockHeight:undefined);setStatus(state);if(state==='confirmed'){const found=await getReceipt(sig);setReceipt(found);clearPending();setPending(null);setReview(null);}else if(state==='failed'){setNotice('This transaction failed on-chain. It did not create a valid receipt. You can review a new proof.');clearPending();setPending(null);}else if(state==='expired'){setNotice('The signing window expired and this RPC returned no transaction record. Check the explorer before deciding to create another proof.');}else{setNotice('Confirmation is still unresolved. Keep the signature and check again before creating a duplicate.');}}catch(e){setNotice(e.message);}finally{setBusy(false);}
  }
+ const reconcileRef=useRef(reconcile);reconcileRef.current=reconcile;
+ useEffect(()=>{
+  if(!pending?.signature)return;
+  let active=true,timer,attempts=0;const sig=pending.signature;
+  const poll=async()=>{if(!active)return;attempts++;await reconcileRef.current(sig);if(active&&attempts<5)timer=setTimeout(poll,5000);};
+  timer=setTimeout(poll,5000);return()=>{active=false;clearTimeout(timer);};
+ },[pending?.signature]);
  async function publish(){
   setBusy(true);setNotice('');try{const sig=await signAndPublish(sessionRef.current,review);setPending({signature:sig,...review.proof});setReview(null);setStatus('pending');await reconcile(sig);}catch(e){if(e.signature){setPending({signature:e.signature,...review.proof});setReview(null);setStatus('unresolved');}setNotice(e.message);}finally{setBusy(false);}
  }
